@@ -1,0 +1,296 @@
+/* ============================================================
+   BRAND BOOK · deck chrome
+   Loads on top of the published type system. This file owns
+   slide geometry and nothing about type: every size, weight,
+   tracking and measure comes from type-system.css, and every
+   color from that brand's palette.css.
+
+   Vertical values are multiples of 4 (rule 12). Border widths
+   are not vertical values and are exempt.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; background: #6E6E6E; }
+body {
+  margin: 0;
+  background: #6E6E6E;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 40px 20px 80px; }
+
+/* One 16:9 slide. 1600x900 base. */
+.slide {
+  position: relative;
+  width: 1600px; height: 900px;
+  flex: none;
+  background: var(--bg-canvas);
+  color: var(--fg-1);
+  overflow: hidden;
+  padding: 96px 112px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 18px 48px rgba(0,0,0,0.28);
+}
+
+/* ---- chrome ------------------------------------------------ */
+/* --fg-4 is a dimmed non-text mark in every kit: 2.56:1 in Apex and
+   Royal, 2.81:1 in CE. The foot is text, so it takes --fg-3. */
+.s-foot {
+  position: absolute; left: 112px; right: 112px; bottom: 56px;
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--fg-3);
+}
+/* The trailing letter-space of the tracking holds the folio 2px short
+   of the right margin every other element lands on. */
+.s-foot > :last-child { margin-right: -0.10em; }
+.slide.dark .s-foot { color: var(--fg-on-dark-3); }
+
+/* The second baseline is fixed. The head is a 160px box whatever the
+   standfirst runs to, so the rule lands on y 304 and the body opens on
+   y 344 with 460px to the content floor, on every content slide. */
+.s-head { flex: none; height: 160px; margin: 0 0 48px; }
+.s-head .bk-eyebrow { color: var(--fg-accent); margin: 0 0 12px; }
+.s-head h2 { margin: 0; }
+.s-head .sub { margin: 16px 0 0; color: var(--fg-2); }
+
+/* 1px of rule plus 39px of margin is one 40px step. The border is a border
+   width, not a vertical value, so the step is on the grid (rule 12). */
+.s-rule { height: 0; border-top: 1px solid var(--border-1); margin: 0 0 39px; flex: none; }
+.slide.dark .s-rule { border-top-color: var(--border-on-dark); }
+
+.s-body { flex: 1 1 auto; min-height: 0; }
+
+/* ---- cover ------------------------------------------------- */
+.slide.cover {
+  background: var(--bg-band);
+  justify-content: flex-end;
+  padding-bottom: 112px;
+}
+.slide.cover .mark { position: absolute; top: 96px; left: 112px; height: 68px; width: auto; }
+.slide.cover .rule-accent { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--border-band-rule); }
+/* -5px is the optical inset of the B of Brand against the mark and the
+   meta line, both of which start on the margin. */
+.slide.cover h1 { margin: 0 0 0 -5px; max-width: var(--measure-display); }
+.slide.cover .meta { margin: 32px 0 0; font-size: 14px; letter-spacing: 0.005em; color: var(--fg-on-dark-2); }
+/* The colophon is two facts, not one sentence. Run as one line it reached the
+   measure and broke: Royal's kit path plus the command left "before you ship"
+   stranded, and CE's pushed the command onto a second line on its own. One
+   line per fact, each well short of the measure, so neither wraps and the
+   measure M12 restored stays in force. */
+.slide.cover .meta + .meta { margin-top: 8px; }
+
+/* ---- logo showcase ----------------------------------------- */
+/* Equal cells. At 1.35fr and 1fr each cell bound the same lockup at its own
+   width, so the mark page printed one mark at two sizes: Royal 677x165 beside
+   472x115, Apex 499x240 beside 472x227, CE 600x100 beside 472x79. Equal
+   columns bind both images against the same box, which is the only way a
+   page whose argument is "the same mark on either ground" can hold. */
+.logo-stage {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border: 1px solid var(--border-1); height: 100%;
+}
+.logo-stage > div { display: flex; align-items: center; justify-content: center; padding: 56px; }
+.logo-stage > div + div { border-left: 1px solid var(--border-1); }
+.logo-stage .on-dark { background: var(--bg-band); }
+.logo-stage img { max-width: 100%; max-height: 240px; width: auto; height: auto; }
+
+.logo-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border-1); }
+.logo-grid > div { padding: 40px 32px; border-left: 1px solid var(--border-1); display: flex; flex-direction: column; gap: 24px; }
+.logo-grid > div:first-child { border-left: 0; }
+.logo-grid .frame { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 224px; }
+.logo-grid .frame.dk { background: var(--bg-band); }
+.logo-grid img { max-width: 100%; max-height: 112px; width: auto; }
+/* The cell carries the filename and nothing else, because the filename
+   is the slide's whole argument. A filename is a code. */
+.logo-grid .cap { font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--fg-2); }
+
+/* ---- color ------------------------------------------------- */
+.swatches { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: 100%; border: 1px solid var(--border-1); }
+.swatch { display: flex; flex-direction: column; border-left: 1px solid var(--border-1); }
+.swatch:first-child { border-left: 0; }
+/* Fixed, so every chip bottom lands on the same line regardless of how long
+   its caption runs. 240px is the most the chip can take and still leave the
+   longest caption in the house clear of the running foot: the info block
+   needs 24 + 32 + 8 + 46 + 16 + 68 + 24 = 218 of the 460px body. */
+.swatch .chip { height: 240px; flex: none; }
+.swatch .info { flex: 1 1 auto; padding: 24px; background: var(--bg-canvas); }
+.swatch .nm { font-weight: var(--weight-bold); font-size: 20px; letter-spacing: -0.008em; margin: 0 0 8px; }
+.swatch .hex { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; color: var(--fg-2); line-height: 1.9; }
+.swatch .use { font-size: 14px; line-height: 1.5; color: var(--fg-3); margin: 16px 0 0; max-width: 26ch; }
+
+/* ---- contrast ---------------------------------------------- */
+/* The rows divide the body, so the table bottoms on the floor whatever
+   row count the brand supplies. */
+.pairs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+         border: 1px solid var(--border-1); height: 100%; grid-auto-rows: 1fr; }
+.pair { display: grid; grid-template-columns: 190px 1fr 172px; align-items: stretch;
+        border-top: 1px solid var(--border-1); }
+.pairs > .pair:nth-child(-n+2) { border-top: 0; }
+.pairs > .pair:nth-child(even) { border-left: 1px solid var(--border-1); }
+/* Apex measures seven pairs and the other two measure six. An odd count left
+   the last cell of the grid empty and bordered, 687 x 115px of nothing at the
+   bottom right. The seventh pair takes the whole row instead, so the row count
+   and the row height are unchanged and the table has no hole. */
+.pairs > .pair:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* Body size and body weight. WCAG large is 24px, or 18.66px at 700, so a
+   specimen set larger than body would pass tests the reader's page fails. */
+.pair .demo { display: flex; align-items: center; padding: 0 24px;
+              font-weight: var(--weight-regular); font-size: 16px; }
+.pair .spec { display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;
+              font-size: 12px; color: var(--fg-3); line-height: 1.8; }
+.pair .spec .hx { font-family: var(--font-mono); color: var(--fg-2); }
+/* Rule 13 scopes the mono to codes, IDs and unit numbers. The ratio is a
+   measurement and takes it; AA ANY SIZE, LARGE OR BOLD and FAILS are words
+   and take the sans, tracked and uppercase like every other label. */
+.pair .verdict { display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+                 padding: 0 24px; text-align: right; white-space: nowrap;
+                 font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.08em;
+                 text-transform: uppercase; line-height: 1.7; }
+.pair .verdict .r { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pair .verdict .w { font-weight: var(--weight-semibold); letter-spacing: 0.10em; }
+/* One encoding for all three verdicts: the word in fg-1, the status carried by
+   a 4px tab on the cell's outer edge, where it lands on the table border. Green
+   text for pass and red for fail beside an amber that cannot be text was three
+   encodings for one column, and --status-warn is 3.40:1 on white. */
+.pair .verdict { color: var(--fg-1); }
+.pair .verdict.pass  { box-shadow: inset -4px 0 0 var(--status-go); }
+.pair .verdict.large { box-shadow: inset -4px 0 0 var(--status-warn); }
+.pair .verdict.fail  { box-shadow: inset -4px 0 0 var(--status-stop); }
+
+/* ---- type -------------------------------------------------- */
+.scale-row { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: baseline;
+             padding: 4px 0; border-top: 1px solid var(--border-1); }
+.scale-row:first-child { border-top: 0; }
+.scale-row .m { font-size: 12px; color: var(--fg-3); line-height: 1.6; }
+.scale-row .m b { font-family: var(--font-mono); color: var(--fg-1); font-weight: var(--weight-semibold); display: block; }
+.scale-row .sample { overflow: hidden; white-space: nowrap; }
+
+.wt-row { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: baseline;
+          padding: 8px 0; border-top: 1px solid var(--border-1); }
+.wt-row:first-child { border-top: 0; }
+/* The reserved rows carry a label and no licensed specimen: the absence is the
+   point. Dimming them with opacity would put the label under 2:1. */
+.wt-row.off .m b { color: var(--fg-3); }
+.wt-row .m { font-size: 12px; color: var(--fg-3); line-height: 1.6; }
+.wt-row .m b { font-family: var(--font-mono); color: var(--fg-1); font-weight: var(--weight-semibold); display: block; }
+.wt-row .sample { font-size: 40px; line-height: 1.1; letter-spacing: -0.012em; }
+/* The label column ends on x412 and the row rule runs to x1488, so a reserved
+   row was a full-measure rule over two thirds of nothing. It carries the clamp
+   result instead: the words are set in the weight the banned step actually
+   resolves to, which is what the standfirst on this page claims. Quieter than
+   a licensed specimen at 40px, and it puts no banned weight in the source.
+   24px is the h3 step, so its leading and tracking are the ladder's. */
+.wt-row .sample.clamp { font-size: 24px; line-height: 1.35; letter-spacing: -0.004em;
+                        color: var(--fg-3); }
+
+/* ---- typeface ---------------------------------------------- */
+.alpha { font-size: 40px; line-height: 1.35; margin-top: 32px; color: var(--fg-2); max-width: 780px; }
+
+/* ---- components -------------------------------------------- */
+.demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 64px; }
+/* Two rows of panels divide the body, so the grid bottoms on the floor. */
+.demo-grid.fill { height: 100%; }
+.demo { border: 1px solid var(--border-1); }
+.demo .lbl { font-size: 12px; letter-spacing: 0.11em; text-transform: uppercase;
+             font-weight: var(--weight-semibold); color: var(--fg-1);
+             padding: 12px 20px; border-bottom: 1px solid var(--border-1); background: var(--bg-surface); }
+.demo .inner { padding: 24px; }
+
+.d-band { background: var(--bg-band); padding: 24px; display: flex; justify-content: space-between;
+          align-items: center; gap: 20px; border-bottom: 4px solid var(--border-band-rule); }
+.d-sub { background: var(--brand-primary); padding: 8px 24px; }
+.d-table { width: 100%; border-collapse: collapse; }
+.d-table th { background: var(--bg-band); color: var(--fg-on-dark-1); padding: 8px 16px; }
+/* --fg-2 is 4.43:1 on the Royal tint and 4.31:1 on the Apex tint, so the
+   even rows failed AA while the odd rows passed. --fg-1 is 13.25:1 on both. */
+.d-table td { padding: 8px 16px; border-bottom: 1px solid var(--border-1); color: var(--fg-1); }
+.d-table tr:nth-child(even) td { background: var(--bg-surface); }
+.d-stat { display: flex; gap: 44px; }
+.d-stat .st { border-top: 3px solid var(--brand-accent); padding-top: 8px; }
+.d-stat .st .bk-stat { color: var(--fg-accent); }
+
+/* brands.json licenses the decision fill for "large or bold only, which is
+   what a node label is". 20px at 700 clears the 18.66px bold threshold; the
+   13px semibold it was set at did not. */
+.node { border-radius: 6px; padding: 8px 24px; font-weight: var(--weight-bold); font-size: 20px;
+        text-transform: uppercase; letter-spacing: 0.08em; display: inline-block; }
+.node-spec { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin: 8px 0 0; }
+
+/* ---- do / do not ------------------------------------------- */
+.dd { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border-1); height: 100%; }
+.dd > div { padding: 44px 40px; }
+.dd > div + div { border-left: 1px solid var(--border-1); }
+.dd h4 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+         font-weight: var(--weight-semibold); margin: 0 0 24px; }
+.dd .yes h4 { color: var(--status-go); }
+.dd .no  h4 { color: var(--status-stop); }
+.dd ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 24px; }
+.dd li { font-size: 16px; line-height: 1.5; color: var(--fg-2); padding-left: 24px; position: relative;
+         max-width: var(--measure-body); }
+.dd li::before { position: absolute; left: 0; top: 0; font-family: var(--font-mono); font-size: 16px; }
+.dd .yes li::before { content: "+"; color: var(--status-go); }
+.dd .no  li::before { content: "\00d7"; color: var(--status-stop); }
+
+/* ---- reference --------------------------------------------- */
+/* The label column is prose and sets in Montserrat. Only the value column
+   is a string a person retypes, so only it takes the mono face. */
+.ref { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ref th { text-align: left; font-weight: var(--weight-semibold); letter-spacing: 0.11em; text-transform: uppercase;
+          color: var(--fg-3); padding: 8px 16px; border-bottom: 1px solid var(--border-1); }
+/* 4px, so a row is 28px and not 36px. Nine rows of asset paths and the drop-in
+   callout under them come to 414px of the 460px body; at 36px the CE table alone
+   pushed the callout to y 825, onto the running foot. */
+.ref td { padding: 4px 16px; border-bottom: 1px solid var(--border-1); color: var(--fg-2); }
+.ref td:not(:first-child) { font-family: var(--font-mono); }
+/* Not every value column is a code. The composition and metric tables hold
+   prose in the second cell, and prose is never mono. */
+.ref td .prose { font-family: var(--font-sans); letter-spacing: 0; }
+.ref td:first-child { color: var(--fg-1); font-weight: var(--weight-semibold); white-space: nowrap; }
+
+/* ---- assets ------------------------------------------------ */
+/* Section 13 was the one content page whose body carried no frame, so its
+   table floated: seven rows ran y344 to y578 and left 113px of nothing above
+   the callout, and the path column was 1145px wide for a 560px longest path.
+   It now takes the frame every other body on every other slide takes, a band
+   header like the component table on section 11, a third column that says
+   what each file is for, and rows that divide the height they are given, the
+   way the contrast pairs on section 06 do. Seven rows and nine rows bottom on
+   the same line. */
+.ref.assets { height: 100%; border: 1px solid var(--border-1); }
+/* Rule 4: on a dark ground every step gains 0.005em. 600 is already the floor. */
+.ref.assets th { color: var(--fg-on-dark-1); background: var(--bg-band);
+                 border-bottom: 0; padding: 12px 16px; letter-spacing: 0.115em; }
+.ref.assets tbody tr:last-child td { border-bottom: 0; }
+.ref.assets th:first-child,  .ref.assets td:first-child  { width: 232px; }
+.ref.assets th:nth-child(2), .ref.assets td:nth-child(2) { width: 664px; }
+
+/* ---- print ------------------------------------------------- */
+/* Inches, not px. Chrome ignores a px @page size and falls back to its default
+   sheet, which fitted two slides per page. 1600x900 at 96dpi is 16.667 x 9.375in. */
+@page { size: 16.667in 9.375in; margin: 0; }
+@media print {
+  *, *::before, *::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { background: #fff; }
+  .deck { display: block; padding: 0; gap: 0; }
+  .slide { box-shadow: none; break-after: page; page-break-after: always;
+           margin: 0; width: 16.667in; height: 9.375in; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  .noprint { display: none !important; }
+}
+
+/* ---- screen toolbar ---------------------------------------- */
+.bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(17,17,17,0.92); backdrop-filter: blur(8px);
+  color: #fff; padding: 11px 20px; display: flex; align-items: center; gap: 20px;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em;
+}
+.bar a { color: #fff; text-decoration: none; opacity: .62; padding: 4px 0; }
+.bar a:hover, .bar a.on { opacity: 1; }
+.bar .sp { flex: 1; }
+.bar button { font: inherit; background: #fff; color: #111; border: 0; padding: 7px 14px; cursor: pointer; letter-spacing: 0.08em; }
+.deck { padding-top: 76px; }
