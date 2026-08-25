@@ -10,6 +10,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 KITS = "/Users/jacob.sarasohn/collective-edge"
 REG = json.load(open(f"{KITS}/collective-edge-brand-kit/brands.json", encoding="utf-8"))
 TOK = json.load(open(f"{KITS}/collective-edge-brand-kit/snippets/type-tokens.json", encoding="utf-8"))
+# The floor under the co-brand lockup, from the parent kit's own tokens.json.
+# cobrand.css calls it a floor and not a target, and section 07 says so where it
+# prints the fallback, so the figure is read from the kit rather than typed.
+CE_FLOOR = json.load(open(f"{KITS}/collective-edge-brand-kit/tokens.json",
+                          encoding="utf-8"))["logos"]["minWidth"]["horizontal"]
 PIN = "@v1.1"
 NB = "\u00a0"
 NUM = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven"}
@@ -19,8 +24,21 @@ CDN_ROOT = "https://cdn.jsdelivr.net/gh/collective-edge/"
 # badges and the headings all read from it, so a reader who follows a row
 # arrives at a page with the same number and the same words on it.
 SECTIONS = ["The brand", "The mark", "Mark variants", "Colour", "Colour in use",
-            "Contrast, measured", "Typeface", "Four weights", "The ladder",
-            "Composition", "Components", "Do and do not", "Assets"]
+            "Contrast, measured", "Powered by Collective Edge", "Typeface",
+            "Four weights", "The ladder", "Composition", "Components",
+            "Do and do not", "Assets"]
+
+# The partner mark on the co-brand specimen. 158px is the width the shipped
+# mode A snippet in the Collective Edge kit's reference/layout.md sets under the
+# 204px CE lockup, and the difference is the point: 204 - 158 = 46px of hairline
+# running past the right edge of the mark above it.
+MARK_W = 158
+
+# The co-brand label on each brand's own dark band, as cobrand.css publishes it.
+# label_contrast() recomputes every figure from that brand's palette.css and
+# refuses to build if one has moved, so these three numbers cannot go stale.
+LABEL_CONTRAST = {"apex-brand-kit": 5.98, "royal-brand-kit": 6.61,
+                  "collective-edge-brand-kit": 7.84}
 
 
 # ---------- contrast ----------
@@ -55,6 +73,25 @@ def palette_value(repo, name):
     while v and v.startswith("var("):
         v = decl.get(v[4:-1].strip())
     return v
+
+
+def label_contrast(repo):
+    """The co-brand label on that brand's own dark band, measured not cited.
+
+    cobrand.css publishes 5.98:1 for Apex, 6.61:1 for Royal and 7.84:1 for
+    Collective Edge. Section 07 paints the same label on the same grounds, so
+    it recomputes the figure with the WCAG formula above and stops the build if
+    a palette has moved under the number the comment beside it names. Returns
+    the two colours it measured, which is what the Collective Edge book writes
+    inline when it borrows a partner's band.
+    """
+    fg = palette_value(repo, "--fg-on-dark-3")
+    bg = palette_value(repo, "--bg-band")
+    r = ratio(fg, bg)
+    want = LABEL_CONTRAST[repo.split("/")[-1]]
+    if round(r, 2) != want:
+        raise SystemExit(f"co-brand label on {repo}: {r:.2f}:1 against a stated {want}:1")
+    return fg, bg
 
 
 def surface_tint(repo, col):
@@ -190,16 +227,24 @@ def build(key):
       <div class="rule-accent" style="background:{band_rule};z-index:1"></div>""", foot=False)
 
     # 02 CONTENTS
-    # Two columns of seven and six. Thirteen 56px rows in one column ran 188px
-    # past the floor and printed two of them through the running foot.
+    # Two columns of seven. A row is intrinsically 56px, 12 + 12 padding, 1
+    # border and a 31px line box, so fourteen in one column would be 784px
+    # against a 460px body. Seven auto tracks in that body are not intrinsic
+    # either: they stretch to fill it, so the measured pitch is 460 / 7 =
+    # 65.71px and the seventh row bottoms on the y804 floor exactly.
     rows = "".join(
         f'<div style="display:grid;grid-template-columns:56px 1fr;gap:20px;padding:12px 0;'
         f'border-top:1px solid var(--border-1)">'
         f'<span style="font-family:var(--font-mono);font-size:12px;color:var(--fg-3)">{i + 1:02d}</span>'
         f'<span class="bk-body-lg">{E(t)}</span></div>'
         for i, t in enumerate(SECTIONS))
-    add("", head("Contents", "Thirteen sections.",
-                 "The first six are this brand. The last seven are the type system it runs on.")
+    # The column break now lands on the sentence break: column one is this
+    # brand, column two is the type system. "The first" and "The last" are cut
+    # because the standfirst they were in already measured 713.9px of the
+    # 714.96px it is given, and six to seven would have broken it to two lines
+    # with a three-word second. The 01 to 14 numerals carry the order instead.
+    add("", head("Contents", "Fourteen sections.",
+                 "Seven are this brand. Seven are the type system it runs on.")
         + f'<div class="s-body" style="display:grid;grid-template-columns:656px 656px;'
           f'gap:0 64px;grid-template-rows:repeat(7,auto);grid-auto-flow:column">{rows}</div>')
 
@@ -340,13 +385,14 @@ def build(key):
                f'<div class="hex">{hx.upper()}<br>{r[0]} {r[1]} {r[2]}</div>'
                f'<p class="use">{E(use)}</p></div></div>')
     # The exclusivity claim used to be unqualified, and three later pages then
-    # printed hues that are in no brand palette. Naming section 11 alone still
+    # printed hues that are in no brand palette. Naming section 12 alone still
     # undercounted: house status colour carries the verdict tabs on section 06
-    # and the do and do not marks on section 12 as well. The claim is scoped to
+    # and the do and do not marks on section 13 as well. The claim is scoped to
     # brand elements and every page that breaks it is named. Two lines at 20px
-    # in a 715px column, which is what the fixed 160px head box holds.
+    # in a 715px column, which is what the fixed 160px head box holds. The two
+    # later numbers each moved up one when section 07 was inserted before them.
     add("", sec(4, "Every brand element draws from this palette exclusively. "
-                   "The exception is house status colour, on sections 06, 11 and 12.")
+                   "The exception is house status colour, on sections 06, 12 and 13.")
         + f'<div class="s-body"><div class="swatches">{sw}</div></div>')
 
     # 07 COLOUR IN USE
@@ -420,9 +466,125 @@ def build(key):
                    "A pair marked large or bold is never body copy.")
         + f'<div class="s-body"><div class="pairs">{pr}</div></div>')
 
-    # 09 TYPEFACE
+    # 09 POWERED BY COLLECTIVE EDGE
+    # The lockup is not redrawn here. The head loads the kit's own cobrand.css
+    # from the CDN beside type-system.css and palette.css, and this slide sets
+    # the shipped markup against it, so 204px, the 24 / 1 / 24 / 12 spacing, the
+    # 0.080em label and both hairline colours are read from that file rather
+    # than retyped in book.css.
+    #
+    # The 204px track is the whole size argument. The mark above it is 158px, so
+    # the hairline cobrand.css draws across the top of .ce-powered runs
+    # 204 - 158 = 46px past the mark's right edge. Drawn, not asserted.
+    cb = REG["cobrand"]
+    lw = cb["lockup"]["width"].removesuffix("px")
+    lh = cb["lockup"]["height"].removesuffix("px")
+
+    def kit_url(k, role):
+        """(url, kit, filename) for one brand's mark. All three resolve from the
+        registry through the same split section 03 uses for its captions, so no
+        path and no filename is typed on this slide."""
+        bb = REG["brands"][k]
+        rel = bb["logos"][role]
+        return (f"https://cdn.jsdelivr.net/gh/{bb['repo']}{PIN}/" + rel,
+                bb["repo"].split("/")[-1], rel.split("/")[-1])
+
+    def an(*lines):
+        """The annotation beside a mark. A width, a repo name and a filename are
+        codes, so they take the mono (rule 13)."""
+        return '<div class="an">' + "<br>".join(E(x) for x in lines) + "</div>"
+
+    def specimen(k, role, ground, light):
+        """One specimen: the partner mark at 158 in a fixed bottom-aligned box,
+        then the shipped .ce-powered block bound to the 204px track, each with
+        its own measurements beside it rather than in a table across the slide.
+        """
+        src, kit, fn = kit_url(k, role)
+        ce_src, ce_kit, ce_fn = kit_url(
+            "collective-edge", "horizontal-on-light" if light else "horizontal-on-dark")
+        return (f'<div{ground}><div class="spec">'
+                f'<img src="{src}" alt="{E(REG["brands"][k]["name"])}" width="{MARK_W}">'
+                + an(f"{MARK_W} px", kit, fn)
+                + f'<div class="{E(cb["classes"]["light" if light else "dark"])}">'
+                  f'<span>{E(cb["label"])}</span>'
+                  f'<img src="{ce_src}" alt="CE · Collective Edge" '
+                  f'width="{lw}" height="{lh}"></div>'
+                + an(f"{lw} × {lh} px", ce_kit, ce_fn)
+                + '</div></div>')
+
+    if is_ce:
+        # The mirror. The parent book shows the same construction it asks the
+        # partners for, partner mark above and the CE lockup below, on each
+        # partner's own band. Both grounds and both label greys resolve through
+        # palette_value(), so cobrand.css reads that partner's own token and the
+        # parent book prints the ratios the partner books print.
+        # LABEL CONTRAST, computed by label_contrast() with the WCAG formula:
+        # #9EA5C4 on Apex #1D225E is 5.98:1, #B0A2BC on Royal #2f193b is 6.61:1.
+        # --border-on-dark is rgba(255,255,255,0.12) in all three kits, so the
+        # hairline needs no override.
+        cells = []
+        for pk in ("apex", "royal"):
+            pfg, pbg = label_contrast(REG["brands"][pk]["repo"])
+            cells.append(specimen(pk, "horizontal-on-dark",
+                                  f' class="dk bk-on-dark" style="background:{pbg};'
+                                  f'--fg-on-dark-3:{pfg}"', False))
+    else:
+        # Cell A is the shipped default on this brand's own --bg-band, cell B
+        # the light-surface variant on --bg-canvas and never on --bg-surface:
+        # on the tint the same label grey measures 4.31:1 for Apex and 4.43:1
+        # for Royal. LABEL CONTRAST on the band, computed by label_contrast():
+        # Apex #9EA5C4 on #1D225E 5.98:1, Royal #B0A2BC on #2f193b 6.61:1.
+        # On white the label takes --fg-3, #64748B, 4.76:1 in both books.
+        label_contrast(b["repo"])
+        cells = [specimen(key, "horizontal-on-dark", ' class="dk bk-on-dark"', False),
+                 specimen(key, "horizontal-on-light", "", True)]
+    # Specimen first and identification second, the same order as the two cells
+    # beside it, so the three read as one system. This is the cell that carries
+    # the floor, because the floor and the fallback answer the same question.
+    fallback = (f'<div><p class="bk-eyebrow" style="margin:0 0 16px">Text only</p>'
+                f'<p class="{E(cb["classes"]["textOnly"])}">{E(cb["phrase"])}</p>'
+                f'<div class="an" style="margin-top:12px">.{E(cb["classes"]["textOnly"])}'
+                f' · 12 px · 600 · 0.080em</div>'
+                f'<p class="bk-body-sm" style="margin:16px 0 0">The last resort. A narrow rail '
+                f'takes the lockup down to the {E(CE_FLOOR)} floor first. '
+                f'{E(cb["lockup"]["width"])} is the target everywhere else.</p></div>')
+    # The intent line sits in the body and not in the standfirst, which is spoken
+    # for by the rule. Section 01 already opens on "An operating company of
+    # Collective Edge"; this cell is the payoff of that line, six sections later.
+    if is_ce:
+        pair = " and ".join(REG["brands"][k2]["name"] for k2 in ("apex", "royal"))
+        relation = (f"{pair} are operating companies of Collective Edge. This is the lockup "
+                    "they carry, set here the way the parent asks for it.")
+    else:
+        relation = (f"{name} is an operating company of Collective Edge. The lockup is where "
+                    "that shows, and a reader who notices it can follow the thread.")
+    # Verbatim from brands.json cobrand.placement, entries 1, 2 and 6.
+    belongs = [cb["placement"][i] for i in (0, 1, 5)]
+    # brands.json cobrand.doNot entries 3, 4 and 5. The imperative is dropped
+    # because the eyebrow supplies it, and entry 4 is cut from "a patient-facing
+    # consent or safety document" so that it sets on one line in the 316px cell
+    # like the two beside it. Entries 1 and 2 are the merge prohibitions and are
+    # deliberately absent: they are the standfirst, and a list that restated the
+    # head of the slide would be filler.
+    forbidden = ["On a clinical instruction",
+                 "On a patient consent or safety form",
+                 "Twice on one surface"]
+    # The rule is the standfirst, in the position every other section slide
+    # reserves for the one idea of the page. It is the thing a reader must not
+    # get wrong, and no cell below repeats it.
+    add("", sec(7, "The lockup rides beside the partner brand, never inside it. "
+                   "A hairline keeps the two marks distinct." if is_ce else
+                "The Collective Edge lockup rides beside this brand, never inside it. "
+                "A hairline keeps the two marks distinct.") + f"""
+      <div class="s-body"><div class="cobrand">
+        {cells[0]}{cells[1]}{fallback}
+        <div><p class="bk-eyebrow">The relation</p><p class="bk-body">{E(relation)}</p></div>
+        {col_list("Where it belongs", belongs)}{col_list("Where it does not", forbidden)}
+      </div></div>""")
+
+    # 10 TYPEFACE
     m = TOK["metrics"]
-    add("", sec(7, "Every brand in the house sets in Montserrat. The kit ships the variable "
+    add("", sec(8, "Every brand in the house sets in Montserrat. The kit ships the variable "
                    "font with the axis clamped from 400 to 800.") + f"""
       <div class="s-body" style="display:grid;grid-template-columns:1fr 380px;gap:64px">
         <div>
@@ -452,7 +614,7 @@ def build(key):
         </div>
       </div>""")
 
-    # 10 WEIGHTS
+    # 11 WEIGHTS
     # The two reserved rows carry no licensed specimen. A live sample at 200 or
     # 900 would put a banned weight in the source, which fails R2. They carried
     # an empty div instead, which drew the row rule to x1488 over a label column
@@ -476,11 +638,11 @@ def build(key):
         + (f'<div class="sample" style="font-weight:{w}">{E(spec)}</div></div>' if spec
            else f'<div class="sample clamp" style="font-weight:{cl[0]}">{E(cl[1])}</div></div>')
         for w, lbl, use, spec, cl in W)
-    add("", sec(8, "Each has exactly one job. The @font-face clamps the axis from 400 to 800, "
+    add("", sec(9, "Each has exactly one job. The @font-face clamps the axis from 400 to 800, "
                    "so a banned weight renders at the nearest permitted one.")
         + f'<div class="s-body">{wr}</div>')
 
-    # 11 SCALE
+    # 12 SCALE
     # All twelve steps at true size, in two registers: display left, text right.
     # Clamping the specimen to 58px rendered 96 and 72 identically, on the one
     # slide whose whole job is to prove the ladder.
@@ -499,16 +661,16 @@ def build(key):
                     + (";text-transform:uppercase" if caps else "")
                     + '">Dispatch</div></div>')
         return out
-    add("", sec(9, "Twelve steps. Eleven land on a whole point size, and body-sm lands on "
+    add("", sec(10, "Twelve steps. Eleven land on a whole point size, and body-sm lands on "
                    "10.5pt. The same scale sets in PowerPoint and Word.") + f"""
       <div class="s-body" style="display:grid;grid-template-columns:800px 512px;gap:0 64px">
         <div>{scale_rows(TOK["scale"][:5])}</div>
         <div>{scale_rows(TOK["scale"][5:])}</div>
       </div>""")
 
-    # 12 COMPOSITION
+    # 13 COMPOSITION
     c = TOK["composition"]
-    add("", sec(10, "A scale is not a type system. These rules make a page look set "
+    add("", sec(11, "A scale is not a type system. These rules make a page look set "
                     "rather than typed.") + f"""
       <div class="s-body" style="display:grid;grid-template-columns:1fr 1fr;gap:64px">
         <div>
@@ -556,7 +718,7 @@ def build(key):
         </div>
       </div>""")
 
-    # 13 COMPONENTS
+    # 14 COMPONENTS
     # Each node prints the ratio the book computes for it, so the panel carries
     # the measurement instead of a sentence promising one.
     dr = REG["diagramRoles"]
@@ -572,7 +734,7 @@ def build(key):
     # hairline at 1px where there is not.
     foot_rule, foot_lbl = ("2px solid var(--border-band-rule)", "Footer, band rule above") \
         if col.get("bandRule") else ("1px solid var(--border-1)", "Footer, hairline above")
-    add("", sec(11, "Built from the shared classes and this brand’s palette. Nothing here is "
+    add("", sec(12, "Built from the shared classes and this brand’s palette. Nothing here is "
                     "styled by hand.") + f"""
       <div class="s-body"><div class="demo-grid fill">
         <div class="demo"><div class="lbl">Table with mono figures</div><div class="inner" style="padding:0">
@@ -603,7 +765,7 @@ def build(key):
         </div></div>
       </div></div>""")
 
-    # 14 DO / DO NOT
+    # 15 DO / DO NOT
     yes = ["Load type-system.css, then this brand’s palette.css.",
            "Style through the .bk-* classes and the semantic variables.",
            "Use the logo variant named for the background it sits on.",
@@ -618,21 +780,22 @@ def build(key):
           "Strand the last word of a heading on its own line.",
           "Synthesize small caps. Montserrat has none.",
           "Type an em dash. Use a period, a comma or a middot."]
-    # The path to the standard belongs on slide 15, where it sets in the mono
+    # The path to the standard belongs on slide 16, where it sets in the mono
     # and cannot break. In a 20px standfirst it wrapped mid-path.
-    add("", sec(12, "Seven of each, drawn from the fifteen rules in the house standard. "
+    add("", sec(13, "Seven of each, drawn from the fifteen rules in the house standard. "
                     "The marks are house status colour, not brand.") + f"""
       <div class="s-body"><div class="dd">
         <div class="yes"><h4>Do</h4><ul>{''.join(f'<li>{E(x)}</li>' for x in yes)}</ul></div>
         <div class="no"><h4>Do not</h4><ul>{''.join(f'<li>{E(x)}</li>' for x in no)}</ul></div>
       </div></div>""")
 
-    # 15 ASSETS
+    # 16 ASSETS
     # Two columns of paths left the page two thirds white in both directions:
-    # a 1145px path column for a 560px longest path, and a seven-row table
-    # that ran y344 to y578 with 113px of nothing under it. A third column
-    # carries what each file is for, which is the question a reader arriving
-    # at a list of URLs is actually asking, and the rows divide the height.
+    # a 1145px path column for a 560px longest path, and a table that ran
+    # y344 to y578 with 113px of nothing under it. A third column carries what
+    # each file is for, which is the question a reader arriving at a list of
+    # URLs is actually asking, and the rows divide the height. .ref.assets is
+    # height:100%, so the rows stretch to whatever the flex region leaves them.
     ref = [("The standard", f"{ce}reference/type-system.md",
             "The fifteen rules, in prose"),
            ("Type system", f"{ce}snippets/type-system.css",
@@ -645,6 +808,12 @@ def build(key):
             "Load second. The semantic variables"),
            ("Colour tokens", f"{cdn}tokens.json",
             "This palette, for those same generators"),
+           # Section 07 prints .ce-powered, .ce-powered-light and
+           # .ce-powered-text and this is the file that paints all three. The
+           # head of this book loads it third, after the palette that supplies
+           # the label and hairline variables it reads.
+           ("Co-brand lockup", f"{ce}snippets/cobrand.css",
+            "Load third. The three classes in section 07"),
            ("Brand registry", f"{cdn}brands.json",
             "Every brand in the house, and the diagram roles")]
     if is_ce:
@@ -659,7 +828,7 @@ def build(key):
     # sentence, not a string anybody retypes, so it leaves the mono (rule 13).
     rr = "".join(f"<tr><td>{E(a)}</td><td>{E(u.replace(CDN_ROOT, ''))}</td>"
                  f"<td>{P(w)}</td></tr>" for a, u, w in ref)
-    add("", sec(13, "Every path below hangs off cdn.jsdelivr.net/gh/collective-edge/ on the "
+    add("", sec(14, "Every path below hangs off cdn.jsdelivr.net/gh/collective-edge/ on the "
                     "public CDN. Pin @v1.1 for stability, @main for the latest.") + f"""
       <div class="s-body" style="display:flex;flex-direction:column">
         <div style="flex:1 1 auto;min-height:0">
@@ -669,11 +838,12 @@ def build(key):
         <div style="margin-top:32px;border:1px solid var(--border-1);padding:24px 28px;background:var(--bg-surface)">
           <p class="bk-eyebrow" style="color:var(--fg-1)">Drop-in</p>
           <pre style="font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--fg-1);margin:8px 0 0;white-space:pre-wrap">&lt;link rel="stylesheet" href="{ce}snippets/type-system.css"&gt;
-&lt;link rel="stylesheet" href="{cdn}snippets/palette.css"&gt;</pre>
+&lt;link rel="stylesheet" href="{cdn}snippets/palette.css"&gt;
+&lt;link rel="stylesheet" href="{ce}snippets/cobrand.css"&gt;</pre>
         </div>
       </div>""")
 
-    # 16 BACK
+    # 17 BACK
     # Two facts, one line each. Run together they reached the 54ch measure and
     # broke: Royal's kit path plus the command left "before you ship" stranded,
     # and CE's pushed the command onto a line by itself. Neither line alone
@@ -701,6 +871,7 @@ def build(key):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="{ce}snippets/type-system.css">
 <link rel="stylesheet" href="{cdn}snippets/palette.css">
+<link rel="stylesheet" href="{ce}snippets/cobrand.css">
 <link rel="stylesheet" href="/book.css">
 <style>:root{{--brand-primary:{col['primary']};--brand-accent:{col['accent']};
   --border-band-rule:{band_rule}}}</style>

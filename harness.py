@@ -134,7 +134,7 @@ AUDIT_JS = r"""
 
 def make_audit_html(book, mapping):
     src = open(os.path.join(HERE, f"{book}.html"), encoding="utf-8").read()
-    # Section 13 prints the drop-in snippet inside a visible <pre>. Those two
+    # Section 14 prints the drop-in snippet inside a visible <pre>. Those three
     # CDN urls are the page's content, not links the renderer resolves, so
     # rewriting them to a vendored path publishes a local file path as the
     # snippet a reader copies, in the png, the geometry and the PDF alike.

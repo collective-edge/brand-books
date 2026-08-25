@@ -161,6 +161,65 @@ body {
 .pair .verdict.large { box-shadow: inset -4px 0 0 var(--status-warn); }
 .pair .verdict.fail  { box-shadow: inset -4px 0 0 var(--status-stop); }
 
+/* ---- powered by collective edge ---------------------------- */
+/* Geometry only. Every co-brand value lives in the kit's own cobrand.css,
+   which the books load from the CDN after the palette: the 204px lockup, the
+   24 / 1 / 24 / 12 spacing, the 0.080em label and both hairline colours. The
+   one of them written again below is the 204, in the first track of .spec,
+   because a track that did not equal the lockup's own width would stop the
+   hairline drawing the overhang the slide is there to show. Nothing else is
+   restated.
+
+   One frame, 1376 x 460 at x112,y344, border-box, so the interior is
+   1374 x 458. Columns 504 + 505 + 365 = 1374 and rows 244 + 214 = 458. Row one
+   is the artefact in three forms, row two is how to use it, and the reading
+   order is left to right, top to bottom. The two specimen cells are equal at
+   504 for the same reason .logo-stage binds both images against equal boxes:
+   the argument is one construction on two grounds, so a difference in size
+   would be read as a difference in the thing. */
+.cobrand {
+  display: grid; height: 100%;
+  grid-template-columns: 504px 505px 365px;
+  grid-template-rows: 244px 1fr;
+  border: 1px solid var(--border-1);
+}
+/* 24px, the padding .demo .inner takes, so the content boxes are 456 / 456 /
+   316 wide by 196 and 165 tall. Nothing in a cell is vertically centred: every
+   cell opens at its padding and the slack falls at the bottom. */
+.cobrand > div { padding: 24px; }
+.cobrand > div:not(:nth-child(3n+1)) { border-left: 1px solid var(--border-1); }
+.cobrand > div:nth-child(n+4)        { border-top: 1px solid var(--border-1); }
+/* Full bleed, not a padded swatch. The lockup ships in a footer rail, and a
+   full-bleed ground is what reads as one. In a partner book this is the only
+   dark region on the slide and the first thing the eye lands on. */
+.cobrand .dk { background: var(--bg-band); }
+
+/* The specimen. Column one is bound to the lockup's own 204px, so the hairline
+   cobrand.css draws across the top of .ce-powered runs the full 204 over a
+   158px mark and 46px of it overhangs. That overhang is the size rule, drawn
+   rather than tabulated. Column two is the annotation: 204 + 24 + 228 = 456,
+   the content width. Row one is a fixed 68px and bottom-aligned, so the Apex
+   mark at 66.45px tall and the Royal mark at 38.56px both land the hairline
+   below them on the same line in every cell of every book. */
+.cobrand .spec {
+  display: grid;
+  grid-template-columns: 204px 228px;
+  column-gap: 24px;
+  grid-template-rows: 68px auto;
+}
+.cobrand .spec > img { align-self: end; justify-self: start; height: auto; display: block; }
+/* Each annotation bottoms on the mark it measures. */
+.cobrand .spec > .an { align-self: end; }
+/* Rule 13 gives the mono to codes and unit numbers, and a width, a repo name
+   and a filename are all three. 12px at 1.45 is the caption step, which is
+   what the label beside it sets at. */
+.cobrand .an { font-family: var(--font-mono); font-size: 12px; line-height: 1.45; color: var(--fg-3); }
+.cobrand .dk .an { color: var(--fg-on-dark-3); }
+/* The two lists take no status colour and no glyph. Section 13 is Do and do
+   not, and repeating its livery here would make this slide read as a second
+   copy of that one. */
+.cobrand .bk-body { color: var(--fg-2); }
+
 /* ---- type -------------------------------------------------- */
 .scale-row { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: baseline;
              padding: 4px 0; border-top: 1px solid var(--border-1); }
@@ -252,15 +311,23 @@ body {
 .ref td:first-child { color: var(--fg-1); font-weight: var(--weight-semibold); white-space: nowrap; }
 
 /* ---- assets ------------------------------------------------ */
-/* Section 13 was the one content page whose body carried no frame, so its
+/* Section 14 was the one content page whose body carried no frame, so its
    table floated: seven rows ran y344 to y578 and left 113px of nothing above
    the callout, and the path column was 1145px wide for a 560px longest path.
    It now takes the frame every other body on every other slide takes, a band
-   header like the component table on section 11, a third column that says
+   header like the component table on section 12, a third column that says
    what each file is for, and rows that divide the height they are given, the
-   way the contrast pairs on section 06 do. Seven rows and nine rows bottom on
+   way the contrast pairs on section 06 do. Eight rows and ten rows bottom on
    the same line. */
 .ref.assets { height: 100%; border: 1px solid var(--border-1); }
+/* A floor, not a padding. The rows stretch to the region and td aligns middle,
+   so nothing vertical on these cells renders: the eight rows of a partner book
+   measure 31.38px and the ten of the parent 25.09px whatever is set here. All
+   it decides is how many rows the table can hold before it outgrows the flex
+   item and runs under the drop-in block below it. At 4px the parent book's ten
+   rows floored the table at 336.06px against a 295.05px region, and the tenth
+   ran 41px over. At 0 the floor is 256.06px and both books measure 295.05. */
+.ref.assets td { padding-top: 0; padding-bottom: 0; }
 /* Rule 4: on a dark ground every step gains 0.005em. 600 is already the floor. */
 .ref.assets th { color: var(--fg-on-dark-1); background: var(--bg-band);
                  border-bottom: 0; padding: 12px 16px; letter-spacing: 0.115em; }
