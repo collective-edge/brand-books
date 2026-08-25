@@ -145,10 +145,12 @@ E = html.escape
 
 
 def P(s):
-    """Prose inside a .ref value column, which otherwise sets in the mono.
+    """A sentence in a .ref value column, rather than a value.
 
-    Rule 13 gives the mono to codes, IDs and unit numbers. "flush left, ragged
-    right" is a sentence, not a string anybody retypes.
+    The column no longer takes the mono by selector, so this no longer switches
+    a face. It marks the cells that are prose, and running prose keeps
+    proportional figures where the column around it is tabular (rule 14).
+    "flush left, ragged right" is a sentence, not a string anybody retypes.
     """
     return f'<span class="prose">{E(s)}</span>'
 
@@ -162,9 +164,20 @@ def ce_palette():
             for k, v in t["palette"].items() if isinstance(v, dict) and v.get("hex")}
 
 
-def caps_hex(s):
-    """One hex is one string. The registry types some of them lower."""
-    return HEX_RE.sub(lambda m: m.group(0).upper(), s)
+def hex_code(s):
+    """One hex is one string, and rule 13 puts a colour value in the mono face
+    wherever it stands, running prose included. The registry types some of them
+    lower, so they are cased here too. Returns escaped HTML: the caller inserts
+    it raw, because the whole point is the span around each match. The slide 3
+    standfirst used to set its hexes in Montserrat while the At a glance panel
+    beside it set the same value in .bk-code."""
+    out, i = [], 0
+    for m in HEX_RE.finditer(s):
+        out.append(E(s[i:m.start()]))
+        out.append('<span class="bk-code">%s</span>' % m.group(0).upper())
+        i = m.end()
+    out.append(E(s[i:]))
+    return "".join(out)
 
 
 def slide(cls, inner, foot=None, n=None, book=None):
@@ -235,7 +248,12 @@ def build(key):
     rows = "".join(
         f'<div style="display:grid;grid-template-columns:56px 1fr;gap:20px;padding:12px 0;'
         f'border-top:1px solid var(--border-1)">'
-        f'<span style="font-family:var(--font-mono);font-size:12px;color:var(--fg-3)">{i + 1:02d}</span>'
+        # Nobody dictates a table of contents number and nobody retypes one, and
+        # 01 to 14 is a closed set a reader scans, so rule 13 leaves it in
+        # Montserrat. It reads as a column, so it takes the tabular figures the
+        # mono was doing the aligning with.
+        f'<span style="font-size:12px;color:var(--fg-3);'
+        f'font-variant-numeric:tabular-nums lining-nums">{i + 1:02d}</span>'
         f'<span class="bk-body-lg">{E(t)}</span></div>'
         for i, t in enumerate(SECTIONS))
     # The column break now lands on the sentence break: column one is this
@@ -252,35 +270,43 @@ def build(key):
     # The parent-and-house relation is the standfirst, so the body carries the
     # two lists instead of a paragraph saying the same thing in prose.
     if not is_ce:
-        lede = caps_hex(b.get("colorNote", ""))
+        lede = hex_code(b.get("colorNote", ""))
         standing = "An operating company of Collective Edge."
     else:
         # The ramp is the eleven --ce-* steps in palette.css, #000000 to
         # #FFFFFF. It used to be named as ending on #F4F4F4, which is --ce-paper,
         # the ninth step, and the same slide's glance table prints #FAFAFA as
         # the surface two rows down.
-        lede = ("Collective Edge is the parent. It has no hue of its own and runs an eleven-step "
-                "grey ramp from #000000 to #FFFFFF. On a co-brand surface the Edge wedge takes "
-                "the partner’s colour and Collective Edge stays grey.")
+        lede = hex_code(
+            "Collective Edge is the parent. It has no hue of its own and runs an eleven-step "
+            "grey ramp from #000000 to #FFFFFF. On a co-brand surface the Edge wedge takes "
+            "the partner’s colour and Collective Edge stays grey.")
         standing = "The parent of the house."
     mn = b.get("minWidth", {})
     scale_span = f"{len(TOK['scale'])} steps · {TOK['scale'][0]['px']}px to {TOK['scale'][-1]['px']}px"
     # A kit that publishes no minimum says so. Falling through to another
     # brand's numbers would print a spec this kit does not hold.
-    glance = [("Typeface", P("Montserrat")),
-              ("Weights", "400 · 600 · 700 · 800"),
-              ("Scale", scale_span),
-              ("Italic", P("none, at any weight")),
-              ("Measure", "54ch " + P(f"= {TOK['measure']['body']['realChars']}{NB}characters")),
-              ("Primary", col["primary"].upper()),
-              ("Accent", col["accent"].upper()),
-              ("Band", col["bandBackground"].upper()),
-              ("Surface", surface),
+    # The third field is rule 13: 1 marks a cell whose whole string is on the
+    # mono whitelist, and only those cells take .bk-code. The four hexes are
+    # retyped into a stylesheet or a picker, and the kit and registry names
+    # resolve against a real path. Everything else here is read and not
+    # transcribed. A weight list, a scale span, a measure and a minimum size
+    # are measurements, and a measurement is Montserrat.
+    glance = [("Typeface", P("Montserrat"), 0),
+              ("Weights", "400 · 600 · 700 · 800", 0),
+              ("Scale", scale_span, 0),
+              ("Italic", P("none, at any weight"), 0),
+              ("Measure", "54ch " + P(f"= {TOK['measure']['body']['realChars']}{NB}characters"), 0),
+              ("Primary", col["primary"].upper(), 1),
+              ("Accent", col["accent"].upper(), 1),
+              ("Band", col["bandBackground"].upper(), 1),
+              ("Surface", surface, 1),
               ("Minimum mark", f"{E(mn['horizontal'])} {P('horizontal,')} {E(mn['mark'])} {P('mark')}"
-                               if mn else P("not published in this kit")),
-              ("Kit", E(b["repo"].split("/")[-1])),
-              ("Registry", f"brands.json · {E(key)}")]
-    gr = "".join(f"<tr><td>{E(k2)}</td><td>{v}</td></tr>" for k2, v in glance)
+                               if mn else P("not published in this kit"), 0),
+              ("Kit", E(b["repo"].split("/")[-1]), 1),
+              ("Registry", f"brands.json · {E(key)}", 1)]
+    gr = "".join("<tr><td>{}</td><td{}>{}</td></tr>".format(
+        E(k2), ' class="bk-code"' if c else "", v) for k2, v, c in glance)
     owns = [f"The mark, in {NUM.get(len(logos), len(logos))} named roles", "The palette",
             "The surface tint", "The proportion it sets them in"]
     house = ["Montserrat, and no italic", "The twelve-step ladder", "The four weights",
@@ -294,7 +320,7 @@ def build(key):
     add("", sec(1, standing) + f"""
       <div class="s-body" style="display:grid;grid-template-columns:736px 576px;gap:64px">
         <div>
-          <p class="bk-body-lg">{E(lede)}</p>
+          <p class="bk-body-lg">{lede}</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:64px">
             {col_list("This brand owns", owns)}{col_list("The house owns", house)}
           </div>
@@ -328,8 +354,14 @@ def build(key):
         # publishes the clear-space rule.
         cells.append(f'<div><div class="frame {"dk" if dk else ""}" style="padding:24px">'
                      f'<img src="{logos[role]}" alt=""></div>'
+                     # The role is the name you ask for and the filename is the
+                     # string you type into a src, so the two lines take two
+                     # faces (rule 13). Role keys are lowercase words and
+                     # hyphens and never carry a digit, so the confusable pairs
+                     # cannot occur in that class at all.
                      f'<div class="cap">{E(role)}<br>'
-                     f'<span style="color:var(--fg-3)">{E(b["logos"][role].split("/")[-1])}</span>'
+                     f'<span class="bk-code" style="color:var(--fg-3)">'
+                     f'{E(b["logos"][role].split("/")[-1])}</span>'
                      f'</div></div>')
     caps = []
     if mn:
@@ -454,9 +486,10 @@ def build(key):
     for fg, bg, lbl in tests:
         r = ratio(fg, bg)
         cl, txt = verdict(r)
-        # The ratio is a measurement and sets in the mono. The verdict is a
-        # sentence about it and does not (rule 13), so the two are separate
-        # spans rather than one cell with one face.
+        # The hex pair is two colour values with a connective between them, and
+        # both are copied, so the whole string takes the mono. The ratio is a
+        # computed measurement and the verdict is a sentence about it, and rule
+        # 13 leaves both in Montserrat. Three spans, because the faces differ.
         pr += (f'<div class="pair"><div class="demo" style="background:{bg};color:{fg}">Aa 16px</div>'
                f'<div class="spec"><span>{E(lbl)}</span>'
                f'<span class="hx">{fg.upper()} on {bg.upper()}</span></div>'
@@ -489,10 +522,15 @@ def build(key):
         return (f"https://cdn.jsdelivr.net/gh/{bb['repo']}{PIN}/" + rel,
                 bb["repo"].split("/")[-1], rel.split("/")[-1])
 
-    def an(*lines):
-        """The annotation beside a mark. A width, a repo name and a filename are
-        codes, so they take the mono (rule 13)."""
-        return '<div class="an">' + "<br>".join(E(x) for x in lines) + "</div>"
+    def an(measure, *codes):
+        """The annotation beside a mark. A mixed string, split at the element and
+        never at the line (rule 13). The first line is a width, which is read off
+        the page and not retyped, so it sets in Montserrat with tabular figures.
+        The repo name and the filename under it are a package identifier and a
+        path, both of which resolve against something real, so they take the
+        mono."""
+        return ('<div class="an">' + E(measure) + '<br><span class="bk-code">'
+                + "<br>".join(E(x) for x in codes) + '</span></div>')
 
     def specimen(k, role, ground, light):
         """One specimen: the partner mark at 158 in a fixed bottom-aligned box,
@@ -543,7 +581,11 @@ def build(key):
     # the floor, because the floor and the fallback answer the same question.
     fallback = (f'<div><p class="bk-eyebrow" style="margin:0 0 16px">Text only</p>'
                 f'<p class="{E(cb["classes"]["textOnly"])}">{E(cb["phrase"])}</p>'
-                f'<div class="an" style="margin-top:12px">.{E(cb["classes"]["textOnly"])}'
+                # A leading dot means a reader is about to type it into markup,
+                # so the selector takes the mono and the measurements after it
+                # do not (rule 13).
+                f'<div class="an" style="margin-top:12px">'
+                f'<span class="bk-code">.{E(cb["classes"]["textOnly"])}</span>'
                 f' · 12 px · 600 · 0.080em</div>'
                 f'<p class="bk-body-sm" style="margin:16px 0 0">The last resort. A narrow rail '
                 f'takes the lockup down to the {E(CE_FLOOR)} floor first. '
@@ -678,8 +720,8 @@ def build(key):
             <tr><td>Alignment</td><td>{P(c['alignment'])}</td></tr>
             <tr><td>Justified</td><td>{P(c['justify'])}</td></tr>
             <tr><td>Centred</td><td>{P(f"never past {NUM[c['centerMaxLines']]} lines")}</td></tr>
-            <tr><td>Headings</td><td>text-wrap: {E(c['textWrapHeading'])}</td></tr>
-            <tr><td>Paragraphs</td><td>text-wrap: {E(c['textWrapParagraph'])}</td></tr>
+            <tr><td>Headings</td><td class="bk-code">text-wrap: {E(c['textWrapHeading'])}</td></tr>
+            <tr><td>Paragraphs</td><td class="bk-code">text-wrap: {E(c['textWrapParagraph'])}</td></tr>
             <tr><td>Orphans / widows</td><td>{c['orphans']} / {c['widows']}</td></tr>
             <tr><td>Body measure</td><td>54ch {P(f"= {TOK['measure']['body']['realChars']}{NB}characters")}</td></tr>
             <tr><td>Caption measure</td><td>40ch {P(f"= {TOK['measure']['caption']['realChars']}{NB}characters")}</td></tr>
@@ -689,7 +731,7 @@ def build(key):
             <tr><td>Heading space</td><td>{P('3 above to 1 below')}</td></tr>
             <tr><td>Vertical rhythm</td><td>{P('multiples of 4')}</td></tr>
             <tr><td>Uppercase</td><td>{P('always tracked, never past four words')}</td></tr>
-            <tr><td>Codes and IDs</td><td>{P('mono face, never Montserrat')}</td></tr>
+            <tr><td>Codes and IDs</td><td>{P('mono face. Nothing else takes it')}</td></tr>
           </table>
         </div>
         <div>
@@ -725,7 +767,10 @@ def build(key):
     nodes = "".join(
         f'<div><span class="node" style="background:{v["fill"]};color:{v["text"]};'
         f'border:1px solid {v["border"]}">{E(k2)}</span>'
-        f'<p class="node-spec">{v["text"].upper()} · {ratio(v["text"], v["fill"]):.2f}:1</p></div>'
+        # Split at the element: the hex is copied into a diagram fill and takes
+        # the mono, the ratio beside it is a measurement and does not (rule 13).
+        f'<p class="node-spec"><span class="bk-code">{v["text"].upper()}</span>'
+        f' · {ratio(v["text"], v["fill"]):.2f}:1</p></div>'
         for k2, v in [("Process", dr["process"]), ("Decision", dr["decision"]), ("Warning", dr["warning"])])
     # Only Apex publishes a bandRule, so on Royal and Collective Edge
     # --border-band-rule is transparent and this panel drew nothing under a
@@ -734,18 +779,23 @@ def build(key):
     # hairline at 1px where there is not.
     foot_rule, foot_lbl = ("2px solid var(--border-band-rule)", "Footer, band rule above") \
         if col.get("bandRule") else ("1px solid var(--border-1)", "Footer, hairline above")
+    # The demo table. A run count is a quantity and a median is a measurement,
+    # so neither is on the mono whitelist (rule 13). The two columns are a real
+    # stack and take .bk-tnum, and .bk-body-sm sets them on the 14px of the
+    # facility column beside them rather than the 16px .bk-code resolved to, so
+    # the row narrows rather than widens.
     add("", sec(12, "Built from the shared classes and this brand’s palette. Nothing here is "
                     "styled by hand.") + f"""
       <div class="s-body"><div class="demo-grid fill">
-        <div class="demo"><div class="lbl">Table with mono figures</div><div class="inner" style="padding:0">
+        <div class="demo"><div class="lbl">Table with tabular figures</div><div class="inner" style="padding:0">
           <table class="d-table">
             <thead><tr><th class="bk-eyebrow" style="margin:0;color:var(--fg-on-dark-1);text-align:left">Facility</th>
             <th class="bk-eyebrow" style="margin:0;color:var(--fg-on-dark-1);text-align:left">Runs</th>
             <th class="bk-eyebrow" style="margin:0;color:var(--fg-on-dark-1);text-align:left">Median</th></tr></thead>
             <tbody>
-              <tr><td class="bk-body-sm">Mercy General</td><td class="bk-code">1,284</td><td class="bk-code">22 min</td></tr>
-              <tr><td class="bk-body-sm">St. Vincent</td><td class="bk-code">412</td><td class="bk-code">31 min</td></tr>
-              <tr><td class="bk-body-sm">Bayview</td><td class="bk-code">968</td><td class="bk-code">14 min</td></tr>
+              <tr><td class="bk-body-sm">Mercy General</td><td class="bk-body-sm bk-tnum">1,284</td><td class="bk-body-sm bk-tnum">22 min</td></tr>
+              <tr><td class="bk-body-sm">St. Vincent</td><td class="bk-body-sm bk-tnum">412</td><td class="bk-body-sm bk-tnum">31 min</td></tr>
+              <tr><td class="bk-body-sm">Bayview</td><td class="bk-body-sm bk-tnum">968</td><td class="bk-body-sm bk-tnum">14 min</td></tr>
             </tbody>
           </table></div></div>
         <div class="demo"><div class="lbl">Diagram roles, house-wide</div><div class="inner">
@@ -826,8 +876,8 @@ def build(key):
     # Printing the whole URL ran the CE table 400px wider than the sheet and
     # left the vendoring pass with no delimiter to stop on. Column three is a
     # sentence, not a string anybody retypes, so it leaves the mono (rule 13).
-    rr = "".join(f"<tr><td>{E(a)}</td><td>{E(u.replace(CDN_ROOT, ''))}</td>"
-                 f"<td>{P(w)}</td></tr>" for a, u, w in ref)
+    rr = "".join('<tr><td>{}</td><td class="bk-code">{}</td><td>{}</td></tr>'.format(
+        E(a), E(u.replace(CDN_ROOT, "")), P(w)) for a, u, w in ref)
     add("", sec(14, "Every path below hangs off cdn.jsdelivr.net/gh/collective-edge/ on the "
                     "public CDN. Pin @v1.1 for stability, @main for the latest.") + f"""
       <div class="s-body" style="display:flex;flex-direction:column">

@@ -104,9 +104,11 @@ body {
 .logo-grid .frame { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 224px; }
 .logo-grid .frame.dk { background: var(--bg-band); }
 .logo-grid img { max-width: 100%; max-height: 112px; width: auto; }
-/* The cell carries the filename and nothing else, because the filename
-   is the slide's whole argument. A filename is a code. */
-.logo-grid .cap { font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--fg-2); }
+/* Two strings on two principles, so they set in two faces. The role key is the
+   name you ask for: lowercase words and hyphens, never a digit, so no member of
+   the class can carry an I/l/1 or an O/0 collision. It is Montserrat. The
+   filename under it is typed into a src, so it takes .bk-code in build.py. */
+.logo-grid .cap { font-size: 12px; line-height: 1.6; color: var(--fg-2); }
 
 /* ---- color ------------------------------------------------- */
 .swatches { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: 100%; border: 1px solid var(--border-1); }
@@ -143,14 +145,16 @@ body {
 .pair .spec { display: flex; flex-direction: column; justify-content: center; padding: 16px 24px;
               font-size: 12px; color: var(--fg-3); line-height: 1.8; }
 .pair .spec .hx { font-family: var(--font-mono); color: var(--fg-2); }
-/* Rule 13 scopes the mono to codes, IDs and unit numbers. The ratio is a
-   measurement and takes it; AA ANY SIZE, LARGE OR BOLD and FAILS are words
-   and take the sans, tracked and uppercase like every other label. */
+/* Rule 13 is a whitelist of four, and a ratio is in none of them: it is a
+   computed measurement a reader compares against 4.5, never retyped and never
+   dictated, and the :1 suffix makes the 1 unmistakable. It sets in Montserrat
+   like AA ANY SIZE, LARGE OR BOLD and FAILS beside it. Seven of them stack
+   down this column, so it keeps the tabular figures .bk-code was supplying. */
 .pair .verdict { display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
                  padding: 0 24px; text-align: right; white-space: nowrap;
                  font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.08em;
                  text-transform: uppercase; line-height: 1.7; }
-.pair .verdict .r { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pair .verdict .r { font-family: var(--font-sans); font-variant-numeric: tabular-nums lining-nums; }
 .pair .verdict .w { font-weight: var(--weight-semibold); letter-spacing: 0.10em; }
 /* One encoding for all three verdicts: the word in fg-1, the status carried by
    a 4px tab on the cell's outer edge, where it lands on the table border. Green
@@ -210,10 +214,14 @@ body {
 .cobrand .spec > img { align-self: end; justify-self: start; height: auto; display: block; }
 /* Each annotation bottoms on the mark it measures. */
 .cobrand .spec > .an { align-self: end; }
-/* Rule 13 gives the mono to codes and unit numbers, and a width, a repo name
-   and a filename are all three. 12px at 1.45 is the caption step, which is
-   what the label beside it sets at. */
-.cobrand .an { font-family: var(--font-mono); font-size: 12px; line-height: 1.45; color: var(--fg-3); }
+/* A mixed string, split at the element and never at the line (rule 13). The
+   first line is a width, which is a measurement and sets here in Montserrat;
+   the repo name and the filename below it are a package identifier and a path,
+   and they take .bk-code in build.py. The tabular figures line 158 px up with
+   204 × 34 px across the two specimens. 12px at 1.45 is the caption step,
+   which is what the label beside it sets at. */
+.cobrand .an { font-size: 12px; line-height: 1.45; color: var(--fg-3);
+               font-variant-numeric: tabular-nums lining-nums; }
 .cobrand .dk .an { color: var(--fg-on-dark-3); }
 /* The two lists take no status colour and no glyph. Section 13 is Do and do
    not, and repeating its livery here would make this slide read as a second
@@ -224,8 +232,13 @@ body {
 .scale-row { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: baseline;
              padding: 4px 0; border-top: 1px solid var(--border-1); }
 .scale-row:first-child { border-top: 0; }
-.scale-row .m { font-size: 12px; color: var(--fg-3); line-height: 1.6; }
-.scale-row .m b { font-family: var(--font-mono); color: var(--fg-1); font-weight: var(--weight-semibold); display: block; }
+/* Twelve spec lines of px, pt, weight, leading and tracking run down this rail,
+   so it takes tabular figures whatever face it is in (rule 14). */
+.scale-row .m { font-size: 12px; color: var(--fg-3); line-height: 1.6;
+                font-variant-numeric: tabular-nums lining-nums; }
+/* The token name is printed without its leading dot, so it is the name of a
+   step and not a selector, and rule 13 leaves it in Montserrat. */
+.scale-row .m b { color: var(--fg-1); font-weight: var(--weight-semibold); display: block; }
 .scale-row .sample { overflow: hidden; white-space: nowrap; }
 
 .wt-row { display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: baseline;
@@ -235,7 +248,12 @@ body {
    point. Dimming them with opacity would put the label under 2:1. */
 .wt-row.off .m b { color: var(--fg-3); }
 .wt-row .m { font-size: 12px; color: var(--fg-3); line-height: 1.6; }
-.wt-row .m b { font-family: var(--font-mono); color: var(--fg-1); font-weight: var(--weight-semibold); display: block; }
+/* A closed set of six values that never contains a letter, so I/l/1 and O/0
+   cannot collide inside it, and the name beside the number disambiguates it
+   twice over. Montserrat, with the tabular figures the six numbers need to
+   start every line down this rail on the same edge. */
+.wt-row .m b { color: var(--fg-1); font-weight: var(--weight-semibold); display: block;
+               font-variant-numeric: tabular-nums lining-nums; }
 .wt-row .sample { font-size: 40px; line-height: 1.1; letter-spacing: -0.012em; }
 /* The label column ends on x412 and the row rule runs to x1488, so a reserved
    row was a full-measure rule over two thirds of nothing. It carries the clamp
@@ -266,7 +284,8 @@ body {
 .d-table th { background: var(--bg-band); color: var(--fg-on-dark-1); padding: 8px 16px; }
 /* --fg-2 is 4.43:1 on the Royal tint and 4.31:1 on the Apex tint, so the
    even rows failed AA while the odd rows passed. --fg-1 is 13.25:1 on both. */
-.d-table td { padding: 8px 16px; border-bottom: 1px solid var(--border-1); color: var(--fg-1); }
+.d-table td { padding: 8px 16px; border-bottom: 1px solid var(--border-1); color: var(--fg-1);
+              font-variant-numeric: tabular-nums lining-nums; }
 .d-table tr:nth-child(even) td { background: var(--bg-surface); }
 .d-stat { display: flex; gap: 44px; }
 .d-stat .st { border-top: 3px solid var(--brand-accent); padding-top: 8px; }
@@ -277,7 +296,11 @@ body {
    13px semibold it was set at did not. */
 .node { border-radius: 6px; padding: 8px 24px; font-weight: var(--weight-bold); font-size: 20px;
         text-transform: uppercase; letter-spacing: 0.08em; display: inline-block; }
-.node-spec { font-family: var(--font-mono); font-size: 12px; color: var(--fg-3); margin: 8px 0 0; }
+/* Mixed, and split at the element: the hex is the half a person copies into a
+   diagram fill and takes .bk-code, the ratio beside it is a measurement and
+   stays in Montserrat. No tabular figures here, because three ratios sit side
+   by side under three differently sized nodes and there is no column to align. */
+.node-spec { font-size: 12px; color: var(--fg-3); margin: 8px 0 0; }
 
 /* ---- do / do not ------------------------------------------- */
 .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border-1); height: 100%; }
@@ -290,13 +313,19 @@ body {
 .dd ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 24px; }
 .dd li { font-size: 16px; line-height: 1.5; color: var(--fg-2); padding-left: 24px; position: relative;
          max-width: var(--measure-body); }
+/* The + and the × are marks, not figures, and the mono is where both are drawn
+   from. A glyph choice, so rule 13 does not reach it. */
 .dd li::before { position: absolute; left: 0; top: 0; font-family: var(--font-mono); font-size: 16px; }
 .dd .yes li::before { content: "+"; color: var(--status-go); }
 .dd .no  li::before { content: "\00d7"; color: var(--status-stop); }
 
 /* ---- reference --------------------------------------------- */
-/* The label column is prose and sets in Montserrat. Only the value column
-   is a string a person retypes, so only it takes the mono face. */
+/* Rule 13 is a whitelist, and painting this column was how the second face
+   escaped it: the value column holds hexes and paths, but it also holds
+   weights, measures, ratios and spans, which are read and never retyped. The
+   column now sets in Montserrat and carries the tabular figures the mono was
+   supplying, and the cells that hold a colour value, a path or a package name
+   take .bk-code one by one in build.py. */
 .ref { width: 100%; border-collapse: collapse; font-size: 12px; }
 .ref th { text-align: left; font-weight: var(--weight-semibold); letter-spacing: 0.11em; text-transform: uppercase;
           color: var(--fg-3); padding: 8px 16px; border-bottom: 1px solid var(--border-1); }
@@ -304,10 +333,11 @@ body {
    callout under them come to 414px of the 460px body; at 36px the CE table alone
    pushed the callout to y 825, onto the running foot. */
 .ref td { padding: 4px 16px; border-bottom: 1px solid var(--border-1); color: var(--fg-2); }
-.ref td:not(:first-child) { font-family: var(--font-mono); }
-/* Not every value column is a code. The composition and metric tables hold
-   prose in the second cell, and prose is never mono. */
-.ref td .prose { font-family: var(--font-sans); letter-spacing: 0; }
+.ref td:not(:first-child) { font-variant-numeric: tabular-nums lining-nums; }
+/* Not every value cell is a figure. The composition, metric and asset tables
+   hold sentences in the value column, and running prose keeps proportional
+   figures (rule 14). */
+.ref td .prose { font-variant-numeric: normal; }
 .ref td:first-child { color: var(--fg-1); font-weight: var(--weight-semibold); white-space: nowrap; }
 
 /* ---- assets ------------------------------------------------ */
