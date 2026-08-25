@@ -360,4 +360,7 @@ body {
 .bar a:hover, .bar a.on { opacity: 1; }
 .bar .sp { flex: 1; }
 .bar button { font: inherit; background: #fff; color: #111; border: 0; padding: 7px 14px; cursor: pointer; letter-spacing: 0.08em; }
-.deck { padding-top: 76px; }
+/* Clearance for the fixed toolbar, screen only. Unscoped, this sat after the
+   print block and leaked into it: 76px pushed slide one down and its foot off
+   the first sheet, so page one printed cut off and no other page did. */
+@media screen { .deck { padding-top: 76px; } }
