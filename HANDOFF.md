@@ -14,10 +14,17 @@ A design system for three brands, in four public repositories under the
 
 | Repository | Tag | What it holds |
 |---|---|---|
-| `collective-edge-brand-kit` | `v1.3` | The parent. Type system, UI layer, layout auditor, brand registry. |
+| `collective-edge-brand-kit` | `v1.4` | The parent. Type system, UI layer, layout auditor, brand registry. |
 | `apex-brand-kit` | `v1.3` | Apex Paramedics palette, logos, references. |
 | `royal-brand-kit` | `v1.3` | Royal Ambulance palette, logos, references. |
 | `brand-books` | main | The generator for the three printed manuals. |
+
+**Why the parent is a version ahead.** `v1.4` withdrew the “Not this. This.”
+construction from the parent's voice and layout references. Apex and Royal did not
+change, so they were not retagged: a version number tracks a repository, not the
+estate. Nothing shipped moved in `v1.4` either, so anything pinned to `@v1.3` for CSS
+or artwork is byte-identical and needs no repin. The pins below are left at `v1.3`
+for that reason.
 
 **The architecture.** Apex and Royal are operating companies under Collective
 Edge. Exactly two things vary between the brands: palette and logo. Seven files
@@ -226,7 +233,7 @@ check caught.
 
 ## 8. Two things worth knowing
 
-**Tags never move.** `v1.0`, `v1.1`, `v1.2` and `v1.3` are frozen. New work gets
+**Tags never move.** `v1.0` through `v1.4` are frozen. New work gets
 a new number. A tag that moves defeats the reason anyone pins to one.
 
 **The tooling proves consistency, not correctness.** The two best catches in this
