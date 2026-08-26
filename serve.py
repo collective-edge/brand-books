@@ -15,6 +15,19 @@ BOOKS = [
 ]
 
 
+# Every generator that writes an HTML file into this directory. The manual is a
+# separate generator with its own page size and its own reader, so it is listed
+# beside build.py rather than folded into it.
+GENERATORS = ["build.py", "ce-manual.py"]
+
+
+def rebuild():
+    for g in GENERATORS:
+        p = os.path.join(HERE, g)
+        if os.path.exists(p):
+            subprocess.run([sys.executable, p], capture_output=True)
+
+
 def index():
     cards = ""
     for key, f, name, deep, prim, acc, repo, note in BOOKS:
@@ -55,6 +68,14 @@ def index():
   .note {{ color: var(--fg-2); font-size: var(--fs-body-sm); margin: 0 0 16px; max-width: none; }}
   .repo {{ font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
            text-transform: uppercase; color: var(--fg-4); margin: 0; }}
+  .manual {{ display: grid; grid-template-columns: 300px 1fr; text-decoration: none;
+             color: inherit; border: 1px solid var(--border-1); margin: 0 0 8px;
+             transition: background var(--dur-base) var(--ease-standard); }}
+  .manual:hover {{ background: var(--bg-surface); }}
+  .m-band {{ background: #000; min-height: 132px; }}
+  .m-meta {{ padding: 28px 32px 32px; }}
+  .m-meta h2 {{ font-size: var(--fs-h3); font-weight: var(--weight-bold); margin: 0 0 8px;
+                letter-spacing: var(--tr-h3); }}
   .foot {{ margin-top: 56px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-4);
            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }}
 </style></head><body>
@@ -64,6 +85,14 @@ def index():
   <p class="bk-body-lg lede">One per brand. Each loads the published type system and its own palette
   from the CDN, so these pages are a live test of the system rather than a picture of it.
   Open a book and use Save as PDF for a print-ready file.</p>
+  <a class="manual" href="/ce-manual.html">
+    <div class="m-band"></div>
+    <div class="m-meta">
+      <h2>Collective&nbsp;Edge brand manual</h2>
+      <p class="note">The outward-facing manual. Letter landscape, print ready.</p>
+    </div>
+  </a>
+  <p class="bk-eyebrow" style="margin:56px 0 16px;color:var(--fg-3)">INTERNAL SPEC SHEETS</p>
   <div class="grid">{cards}</div>
   <div class="foot"><span>rebuilt on every load · port {PORT}</span>
   <span>1600 × 900 · landscape PDF</span></div>
@@ -77,8 +106,7 @@ class H(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         clean = self.path.split("?")[0]
         if clean in ("/", "/index.html"):
-            subprocess.run([sys.executable, os.path.join(HERE, "build.py")],
-                           capture_output=True)
+            rebuild()
             b = index().encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -87,8 +115,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(b)
             return
         if clean.endswith(".html"):
-            subprocess.run([sys.executable, os.path.join(HERE, "build.py")],
-                           capture_output=True)
+            rebuild()
         return super().do_GET()
 
     protocol_version = "HTTP/1.1"

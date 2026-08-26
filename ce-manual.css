@@ -1,0 +1,364 @@
+/* ============================================================
+   COLLECTIVE EDGE · BRAND MANUAL
+   Sheet geometry and page chrome. This file owns position and
+   nothing else: every size, weight, tracking and measure comes
+   from the published type system, and every colour from the
+   published palette.
+
+   THE SHEET. US Letter landscape, 11 x 8.5in, which at 96 pixels
+   to the inch is exactly 1056 x 816. One point is 4/3 of a pixel,
+   so every step on the ladder lands on a whole pixel and a
+   specimen set at 96px measures one inch on paper.
+
+   THE SPINE. The lockup carries one piece of drawn geometry that
+   is not a letter: the vertical bar between the block and the
+   name. It sits 20.7% into the drawn width. 20.7% of the 912px
+   live area is x 260, inside the third column, so the rail takes
+   three columns and the bar is placed at x 294, the exact centre
+   of the gutter between column three and column four. It runs
+   down every interior page and never crosses the head rule,
+   which starts 12px away at x 306.
+
+   Vertical values are multiples of 4 (rule 12). Border widths
+   are not vertical values and are exempt.
+   ============================================================ */
+
+:root {
+  /* the sheet */
+  --sheet-w: 1056px;
+  --sheet-h: 816px;
+
+  /* the horizontal frame. Live area 912 wide, x 72 to x 984 */
+  --rail-x: 72px;
+  --rail-w: 210px;
+  --spine-x: 294px;
+  --field-x: 306px;
+  --field-w: 678px;
+  --col: 210px;          /* one field column */
+  --gut: 24px;
+  --col2: 444px;         /* two columns and the gutter between them */
+
+  /* the horizons. Fixed on every interior page, never derived from flow */
+  --head-top: 64px;
+  --head-h: 136px;       /* y 64 to y 200 */
+  --rule-y: 224px;
+  --field-top: 256px;
+  --field-h: 480px;      /* y 256 to y 736, fifteen 32px stations */
+  --folio-top: 756px;
+  --spine-top: 64px;
+  --spine-h: 688px;      /* y 64 to y 752 */
+
+  /* the measure. 54ch at 16px Montserrat is 571.97px, which is 70 characters */
+  --measure: 572px;
+  --measure-sf: 444px;   /* the standfirst never runs the field's full width */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; background: #6E6E6E; }
+body {
+  margin: 0;
+  background: #6E6E6E;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The sheet is fixed, so a viewport-relative display step would resolve
+   against the browser window on screen and against the sheet in print and set
+   two different books. Pin the display steps to their desktop ladder values,
+   which at 96 pixels to the inch are the print sizes exactly. */
+.bk-display-xl { font-size: 96px; }
+.bk-display-lg { font-size: 72px; }
+.bk-display-md { font-size: 56px; }
+.bk-h1 { font-size: 40px; }
+.bk-h2 { font-size: 32px; }
+
+.book { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px 20px 64px; }
+
+/* ---- the sheet -------------------------------------------- */
+.page {
+  position: relative;
+  width: var(--sheet-w);
+  height: var(--sheet-h);
+  flex: none;
+  background: var(--bg-canvas);
+  color: var(--fg-1);
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.30);
+}
+.page.dark { background: var(--ce-black); color: var(--fg-on-dark-1); }
+
+/* ---- the spine -------------------------------------------- */
+/* 1px of drawn geometry, in the same place on every interior page. It stops
+   16px above the folio baseline, so the folio hangs off its foot the way the
+   wordmark hangs off the bar. */
+.m-spine {
+  position: absolute;
+  left: var(--spine-x);
+  top: var(--spine-top);
+  width: 1px;
+  height: var(--spine-h);
+  background: var(--border-1);
+}
+.page.dark .m-spine { background: var(--border-on-dark); }
+
+/* ---- the head block --------------------------------------- */
+/* Top-aligned. Bottom-aligning it held the rule steady but let the title's cap
+   line move: a three-line standfirst pushed the block to y 55, nine pixels
+   above the horizon, while a two-line one started at y 86. The rule is
+   absolutely positioned at y 224 either way, so top-aligning fixes BOTH the
+   title cap line and the rule, and the only thing that moves is the standfirst's
+   tail, which lands in white space where nothing reads it. Three lines of
+   standfirst close on y 213, still clear of the rule. */
+.m-head {
+  position: absolute;
+  left: var(--field-x);
+  top: var(--head-top);
+  width: var(--field-w);
+  height: var(--head-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.m-head .m-title { margin: 0; max-width: 593px; }
+.m-head .m-standfirst { margin: 12px 0 0; }
+
+/* The running eyebrow is a caps label at the foot of the ladder, the same step
+   as the folio it answers across the page. Without the type it inherits body
+   and sets the rail two sizes too large. */
+.m-eyebrow {
+  position: absolute;
+  left: var(--rail-x);
+  top: var(--head-top);
+  width: var(--rail-w);
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tr-caps-small);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.page.dark .m-eyebrow { color: var(--fg-on-dark-3); letter-spacing: 0.085em; }
+
+.m-rule {
+  position: absolute;
+  left: var(--field-x);
+  top: var(--rule-y);
+  width: var(--field-w);
+  height: 0;
+  border-top: 1px solid var(--border-1);
+}
+.page.dark .m-rule { border-top-color: var(--border-on-dark); }
+
+/* ---- the field -------------------------------------------- */
+.m-field {
+  position: absolute;
+  left: var(--field-x);
+  top: var(--field-top);
+  width: var(--field-w);
+  height: var(--field-h);
+}
+
+/* The rail is a label column. It holds eyebrows, part signatures, dimension
+   callouts and a note of at most three lines. At 14px it buys 29 characters to
+   the line, so one paragraph dropped in here breaks the page and the density
+   rule in the same move. */
+.m-rail {
+  position: absolute;
+  left: var(--rail-x);
+  width: var(--rail-w);
+}
+
+.m-cols { display: grid; grid-template-columns: repeat(3, var(--col)); gap: var(--gut); }
+.m-cols-2 { display: grid; grid-template-columns: var(--col2) var(--col); gap: var(--gut); }
+
+/* ---- the folio -------------------------------------------- */
+.m-folio {
+  position: absolute;
+  left: var(--rail-x);
+  right: 72px;
+  top: var(--folio-top);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--fg-3);
+}
+.page.dark .m-folio { color: var(--fg-on-dark-3); }
+/* The trailing letter-space of the tracking would push the figure 1px past the
+   margin every other element lands on. */
+.m-folio .m-page-no { margin-right: -0.080em; font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---- type roles ------------------------------------------- */
+/* Three sizes above body in the book's own chrome: 72, 32 and 20. Three
+   weights: 400, 600 and 700. A specimen is quoted artwork inside a bounded
+   field and is exempt from both counts; the page's own head, folio, callouts
+   and captions are not. */
+.m-title { color: var(--fg-1); }
+.page.dark .m-title { color: var(--fg-on-dark-1); }
+.m-standfirst { color: var(--fg-2); max-width: var(--measure-sf); }
+.page.dark .m-standfirst { color: var(--fg-on-dark-2); }
+.m-body { max-width: var(--measure); }
+.m-note { color: var(--fg-3); }
+.m-label {
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tr-caps-small);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin: 0;
+}
+.page.dark .m-label { color: var(--fg-on-dark-3); letter-spacing: 0.085em; }
+.m-sub { margin: 48px 0 16px; color: var(--fg-1); }   /* rule 11, three above, one below */
+.m-sub:first-child { margin-top: 0; }
+
+/* Rule 4: on any dark ground, anything 700 or heavier drops one weight, and
+   600 is the floor because 500 is not in the ladder. Display already drops
+   800 to 700 below; the heading step and emphasis have to drop too. */
+.page.dark .bk-h2, .page.dark .m-title { font-weight: var(--weight-semibold); }
+.page.dark .bk-emphasis { font-weight: var(--weight-semibold); }
+
+/* An ordinal is a count, and rule 13 keeps counts in Montserrat. Only a colour
+   value takes the second face in this book. */
+.m-num {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--fg-3);
+}
+
+/* .bk-emphasis carries the light-surface ink, which on a black page measures
+   1.11:1 and disappears. Emphasis on a dark ground takes the reversed primary. */
+.page.dark .bk-emphasis { color: var(--fg-on-dark-1); }
+
+/* On any dark ground every step gains 0.005em and anything 700 or heavier
+   drops one weight. 600 is the floor, because 500 is not in the ladder. */
+.page.dark .bk-display-lg { font-weight: var(--weight-bold); letter-spacing: 0.025em; }
+.page.dark .m-title { letter-spacing: -0.003em; }
+.page.dark .m-standfirst,
+.page.dark .m-body { letter-spacing: 0.005em; }
+
+/* ---- register ---------------------------------------------- */
+/* Rows on 40px stations. Twelve of them fill the 480px field exactly. The
+   header sets at the size of the cells it heads, never a step under them. */
+.m-reg { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.m-reg th {
+  height: 40px;
+  padding: 0 16px 0 0;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tr-caps-small);
+  text-transform: uppercase;
+  color: var(--fg-1);
+  border-bottom: 1px solid var(--border-2);
+  white-space: nowrap;
+}
+.m-reg td {
+  height: 40px;
+  padding: 0 16px 0 0;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: var(--weight-regular);
+  color: var(--fg-1);
+  border-bottom: 1px solid var(--border-1);
+}
+.m-reg tr:last-child td { border-bottom: 0; }
+.m-reg .q { color: var(--fg-2); }
+.m-reg .num { text-align: right; padding: 0; font-variant-numeric: tabular-nums lining-nums; }
+/* The second face sets at the size of the cells around it. 13px printed 9.8pt,
+   which clears the floor but is not a step on the ladder. */
+.m-reg .mono { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; }
+
+/* ---- specimen chrome --------------------------------------- */
+/* A callout is a hairline and a 12px label set outside the object, never over
+   it. Nothing in this book is drawn on top of a mark. */
+.m-callout { position: absolute; }
+.m-callout .tick { position: absolute; background: var(--border-2); }
+.m-tick-v { width: 1px; }
+.m-tick-h { height: 1px; }
+.m-hair { background: var(--border-1); }
+
+.m-chip { display: block; }
+.m-chip-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* A specimen the reader must not copy sits on the off-white field. A correct
+   specimen sits on pure white. The convention is stated once, on the misuse
+   page, and it costs no colour, which is why it is used instead of a red
+   cross: a red rule in this system is an operational signal. */
+.m-wrong { background: var(--ce-paper); }
+.m-right { background: var(--bg-canvas); }
+
+.m-figure { position: absolute; }
+.m-figure img { display: block; }
+
+/* ---- print -------------------------------------------------- */
+/* Inches, not pixels. Chrome ignores a px page size and falls back to portrait
+   Letter, which would move every absolute horizon in the book. */
+@page { size: 11in 8.5in; margin: 0; }
+
+@media print {
+  *, *::before, *::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { background: #fff; }
+  .book { display: block; padding: 0; gap: 0; }
+  .page {
+    box-shadow: none;
+    margin: 0;
+    width: 11in;
+    height: 8.5in;
+    break-after: page;
+    page-break-after: always;
+  }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .noprint { display: none !important; }
+
+  /* The type system's print block swaps px for pt at every step. On this sheet
+     the two are the same physical size, so the swap is a no-op here and the
+     pinned display steps above have to be restated in the unit it uses. */
+  .bk-display-xl { font-size: 72pt; }
+  .bk-display-lg { font-size: 54pt; }
+  .bk-display-md { font-size: 42pt; }
+  .bk-h1 { font-size: 30pt; }
+  .bk-h2 { font-size: 24pt; }
+}
+
+/* ---- screen toolbar ------------------------------------------ */
+/* Screen only. Unscoped, this clearance leaks into print and pushes the first
+   sheet off the page, which is invisible until somebody exports and looks. */
+.bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(17,17,17,0.92);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 11px 20px;
+  display: flex; align-items: center; gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.bar b { font-family: var(--font-sans); letter-spacing: 0.12em; font-weight: 600; }
+.bar .sp { flex: 1; }
+.bar .hint { opacity: .55; }
+.bar button {
+  font: inherit;
+  background: #fff; color: #111;
+  border: 0; padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.bar button:hover { background: #E2E2E2; }
+
+@media screen { .book { padding-top: 76px; } }

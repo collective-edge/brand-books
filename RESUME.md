@@ -1,51 +1,35 @@
-# Resume the Collective Edge brand manual
+# Resume
 
-Stopped mid-run on 2026-08-25. Nothing was lost: the run had completed its
-research and planning agents but had not written a single file.
+Nothing is in flight. The Collective Edge brand manual, which this file used to
+describe as unfinished, was built on 2026-08-25.
 
-## To restart
+## What is here
 
-Say to Claude Code, in this project directory:
+```bash
+python3 serve.py          # http://localhost:8090
+```
 
-    build the CE manual
+Four documents. The Collective Edge brand manual, twenty-eight pages of US Letter
+landscape written for a partner or a senior hire, and the three internal brand books,
+seventeen slides each, written for whoever is building with the kit.
 
-That is enough. Everything it needs is on disk. If you want it to pick up the
-exact cached research rather than redo it, say instead:
+Print either with background graphics on and margins set to none.
 
-    resume the CE manual workflow
+## The two gates, before shipping anything
 
-and it will replay the finished agents from cache and continue from the plan.
+```bash
+python3 ../collective-edge-brand-kit/scripts/check-sync.py            # expect PASS
+python3 ../collective-edge-brand-kit/scripts/validate.py ce-manual.html
+```
 
-## What it is building
+Both are clean as of the last build. `validate.py` checks the seven mechanical rules
+and cannot check the other eight, so run it and then look at the thing. Every real
+defect found in the manual came from looking at a rendered page: text set over text,
+a claim in near-black on a black ground, an anatomy callout pointing at the wrong end
+of the mark, a column that ran under the folio.
 
-A full Collective Edge brand manual. Print-ready PDF, US Letter landscape,
-11 x 8.5in, roughly 20 to 26 pages. Semi-public facing: written for a partner,
-a prospective hire, or someone who followed "Powered by Collective Edge" out of
-a footer. Deliberately separate from the three internal brand books, which are
-spec sheets for people building with the kit.
+## Worth doing whenever you have twenty minutes
 
-The governing rule: no CDN paths, no file names, no class names, no scripts, no
-repo references. If a sentence only makes sense with the repository checked out,
-it does not belong in the document.
-
-Output lands in `brand-books/` as `ce-manual.py`, `ce-manual.css` and
-`ce-manual.html`.
-
-## State when it stopped
-
-All four repositories clean, pushed, and in sync with GitHub.
-
-    apex-brand-kit               v1.3
-    royal-brand-kit              v1.3
-    collective-edge-brand-kit    v1.3
-    brand-books                  main
-
-Nothing is uncommitted. Nothing is half-written.
-
-## Worth doing whenever you have two minutes
-
-    cd brand-books && python3 serve.py
-
-Open a book at localhost:8090 and use Save as PDF. Seventeen pages per brand.
-No person has read them end to end, and every number in them is verified but
-whether they are right is a judgement, not a measurement.
+Read the manual end to end. Every number in it is verified and every page has been
+looked at, but whether the whole reads as one object is a judgement, and no script
+has an opinion about it.

@@ -18,7 +18,21 @@ import json, os, re, shutil, subprocess, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "_audit")
-KITS = "/Users/jacob.sarasohn/collective-edge"
+def _kits():
+    """Where the sibling brand kits are cloned.
+
+    The setup clones all four repositories into one directory, so the parent of
+    this one is the answer on any machine that followed it. The literal path is
+    the machine this was written on and stays as a last resort.
+    """
+    for c in (os.path.dirname(HERE), os.path.expanduser("~/collective-edge"),
+              "/Users/jacob.sarasohn/collective-edge"):
+        if os.path.isdir(os.path.join(c, "collective-edge-brand-kit")):
+            return c
+    raise SystemExit("no brand kits found beside this repository")
+
+
+KITS = _kits()
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 BOOKS = ["apex", "royal", "ce"]
 CDN = "https://cdn.jsdelivr.net/gh/collective-edge/"

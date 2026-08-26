@@ -7,7 +7,21 @@ are a live test of the house system: identical type layer, palette swapped.
 import json, os, re, html
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KITS = "/Users/jacob.sarasohn/collective-edge"
+def _kits():
+    """Where the sibling brand kits are cloned.
+
+    The setup clones all four repositories into one directory, so the parent of
+    this one is the answer on any machine that followed it. The literal path is
+    the machine this was written on and stays as a last resort.
+    """
+    for c in (os.path.dirname(HERE), os.path.expanduser("~/collective-edge"),
+              "/Users/jacob.sarasohn/collective-edge"):
+        if os.path.isdir(os.path.join(c, "collective-edge-brand-kit")):
+            return c
+    raise SystemExit("no brand kits found beside this repository")
+
+
+KITS = _kits()
 REG = json.load(open(f"{KITS}/collective-edge-brand-kit/brands.json", encoding="utf-8"))
 TOK = json.load(open(f"{KITS}/collective-edge-brand-kit/snippets/type-tokens.json", encoding="utf-8"))
 # The floor under the co-brand lockup, from the parent kit's own tokens.json.

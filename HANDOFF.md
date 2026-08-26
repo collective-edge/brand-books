@@ -139,52 +139,65 @@ actually sets body copy. That mistake was made once and corrected.
 
 ---
 
-## 6. Unfinished: the Collective Edge brand manual
+## 6. The Collective Edge brand manual
 
-This is the work in flight. It was stopped cleanly before it wrote any files.
+Built 2026-08-25. Twenty-eight pages, US Letter landscape, 11 × 8.5in. It lives in
+`brand-books/` as `ce-manual.py`, `ce-manual.css` and `ce-manual.html`, and it is
+deliberately not part of `build.py`: different reader, different format, its own
+generator.
 
-**To restart, in `~/collective-edge`:**
-
+```bash
+cd brand-books && python3 serve.py      # the manual is the first card
 ```
-build the CE manual
-```
 
-**What it is.** A full Collective Edge brand manual. Print-ready PDF, US Letter
-landscape, 11 × 8.5in, 1056 × 816px, roughly 20 to 26 pages.
+Print with **background graphics on and margins none**. Both matter and neither is
+recoverable after the fact.
 
-**Who it is for.** Semi-public. A partner considering working with Collective
-Edge, a hospital system's marketing lead, a senior hire, someone who followed
-"Powered by Collective Edge" out of a footer. Not employees, and they will never
-run a script.
+**The rule it holds.** No CDN paths, no file names, no class names, no scripts, no
+repository names, no version tags, anywhere a reader can see. `guard()` in the
+generator greps the rendered text for those and for straight quotes and em dashes,
+and refuses to write the file. It has caught real ones.
 
-**The one rule that governs it.** No CDN URLs, no file paths, no class names, no
-script names, no repository names, no version tags. If a sentence only makes
-sense to someone with the repository checked out, it does not belong in the
-document. That is the difference between a brand manual and internal
-documentation.
+**The design, in one line.** The bar inside the lockup, at 21.2% of the drawn width,
+enlarged to a spine at x 294 that runs down every interior page. Label to its left,
+statement to its right. It never touches the head rule, which starts at x 306.
 
-**Deliberately separate** from the three internal brand books, which are spec
-sheets for people building with the kit. Different reader, different document,
-different format. Do not extend `build.py`; build it as its own generator.
+**What is read rather than typed.** The palette and its use strings, from the kit's
+tokens. Every contrast ratio, computed. Every proportion of the mark, measured off
+the drawn SVG by `art_geometry()`. That last one matters: the signature bar is a
+stroked line inside a transform, not a filled path, and reading the clip boxes
+instead of the drawing put the wedge at the wrong end of the lockup on the first
+build.
 
-**Output** goes to `brand-books/` as `ce-manual.py`, `ce-manual.css` and
-`ce-manual.html`.
+**Where the numbers cross-check.** The measured artwork gives the wedge as the right
+43.1% of the block and clear space as 8.84% of the lockup width, 0.18in at a 2in
+lockup. Those were derived independently while the copy was being written and they
+agree, which is the only reason to trust either.
 
-**Source material**, all in `collective-edge-brand-kit`:
+**State on the sheet.** Twenty-eight pages, smallest type 9pt with nothing under it,
+every size in the PDF a step on the ladder except the 180pt metric specimen, which is
+declared artwork. Clean on all seven of `validate.py`'s mechanical rules.
 
-- `reference/brand.md` the brand thesis, colour, the Edge wedge, the co-brand
-  model, and a voice section that is the best writing in the estate. The manual
-  should be written **in** CE's rhetorical patterns, "Not this. This." and
-  bold-then-explain, rather than describing them.
-- `reference/type-system.md` the type standard the manual must itself obey.
-- `assets/logos/` the marks. `assets/imagery/` the grain wave.
+**Audited 2026-08-26.** Fourteen agents swept all 28 rendered pages, three lenses ran across
+the whole book, and skeptics refused anything they could not see themselves. 111 findings
+survived. The ones worth recording as classes rather than instances: an absolutely positioned
+specimen leaves the flow and the prose runs underneath it; a fixed row height plus a string
+that wraps sets text on text; `line-height: 1` inside a 1.219em natural line box drops a glyph
+26px away from the rules measuring it; and `table-layout: fixed` takes its column widths from
+the first row, so a header cell that disagrees with its body cell widens the whole table.
 
-**Two format notes that cost time to learn.** Declare `@page` size in inches,
-because a px page size is ignored and the sheet falls back to portrait Letter.
-Put any toolbar clearance inside `@media screen`; unscoped, it leaks into print
-and pushes the first page off the sheet.
+Three of the audit's own top recommendations were wrong, and they were wrong because the brief
+given to the auditors omitted the reversed-text palette and rule 13. They would have pulled
+`#D6D6D6` and `#9E9E9E` out of the book, moved the on-dark tertiary to a value the standard
+says is never text, taken colour values out of the mono face the standard puts them in, and
+re-cut a shipped logo the kit says never to recolour. Check an audit's premises against the
+kit before executing it.
 
----
+**One thing left open.** `reference/brand.md` still lists "Not this. This." as a CE
+voice pattern and `reference/layout.md` still ships it as a layout pattern. The
+manual does not use it, does not name it and does not demonstrate it, on Jacob's
+explicit instruction. The kit and the manual disagree, and the kit is the one that
+should move.
 
 ## 7. Deliberately not done
 
@@ -204,7 +217,10 @@ any of them.
 **Two open questions, both small.** `assets/imagery/CE_Coach.png` and
 `CE_Coach Medium.png` are 3MB together and referenced by nothing. And no person
 has read the three brand books end to end; every number in them is verified, but
-whether they are right is a judgement rather than a measurement.
+whether they are right is a judgement rather than a measurement. The same is now
+true of the manual, with one difference: every one of its twenty-eight pages has
+been looked at as a rendered image, and six defects were found that way that no
+check caught.
 
 ---
 
