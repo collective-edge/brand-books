@@ -1,5 +1,7 @@
 # Brand books
 
+> **Retired, November 2026.** These books describe the brand kits at version 1. The current source for each brand is its kit: [Collective Edge](https://github.com/collective-edge/collective-edge-brand-kit), [Apex Paramedics](https://github.com/collective-edge/apex-brand-kit), [Royal Ambulance](https://github.com/collective-edge/royal-brand-kit). Each kit carries its own guidelines page.
+
 Two things live here. Three internal brand books, one per brand, and the outward-facing
 Collective Edge brand manual.
 
