@@ -44,6 +44,14 @@ APEX = os.path.join(KITS, "apex-brand-kit")
 ROYAL = os.path.join(KITS, "royal-brand-kit")
 
 TOK = json.load(open(os.path.join(CE, "tokens.json"), encoding="utf-8"))
+# Kit v2 ships the palette as a list under "raw". Rebuild the v1 shapes this
+# script reads, so it runs against either version of the kit.
+if "palette" not in TOK and "raw" in TOK:
+    _raw = {r["key"]: r for r in TOK["raw"]}
+    TOK["palette"] = {k: v for k, v in _raw.items() if not k.startswith("wedge")}
+    TOK["wedge"] = {"standalone": _raw["wedgeStandalone"], "royal": _raw["wedgeRoyal"],
+                    "apex": _raw["wedgeApex"]}
+
 REG = json.load(open(os.path.join(CE, "brands.json"), encoding="utf-8"))
 TYPE = json.load(open(os.path.join(CE, "snippets", "type-tokens.json"), encoding="utf-8"))
 

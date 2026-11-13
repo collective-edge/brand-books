@@ -174,8 +174,12 @@ def ce_palette():
     and its own use string. CE ships no accent, so it cannot borrow the accent
     narrative the operating companies share."""
     t = json.load(open(f"{KITS}/collective-edge-brand-kit/tokens.json", encoding="utf-8"))
+    if "raw" in t:   # kit v2: a list of {key, var, hex, use}
+        rows = [(r["key"], r) for r in t["raw"] if not r["key"].startswith("wedge")]
+    else:            # kit v1: an object keyed by name
+        rows = list(t["palette"].items())
     return {v["hex"].upper(): (k.title(), v["use"])
-            for k, v in t["palette"].items() if isinstance(v, dict) and v.get("hex")}
+            for k, v in rows if isinstance(v, dict) and v.get("hex")}
 
 
 def hex_code(s):
